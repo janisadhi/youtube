@@ -1,0 +1,20 @@
+# Ignore everything in the .vagrant directory
+.vagrant/*
+
+# Allow the Vagrantfile to be tracked
+!.vagrant/Vagrantfile
+.ansible/sibersegment.pem
+
+.terraform/aws-ec2-instance/*
+!.terraform/aws-ec2-instance/main.tf
+!.terraform/aws-ec2-instance/output.tf
+!.terraform/aws-ec2-instance/variables.tf
+
+.terraform/aws-eks/*
+!.terraform/aws-eks/main.tf
+!.terraform/aws-eks/output.tf
+!.terraform/aws-eks/variables.tf
+!.terraform/aws-eks/terraform.tf
+!.terraform/aws-eks/README.md
+
+.vscode/*
