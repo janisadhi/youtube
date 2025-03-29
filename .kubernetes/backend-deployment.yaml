@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: youtube-backend
+  namespace: youtube
+  labels:
+    app: youtube-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: youtube-backend
+  template:
+    metadata:
+      labels:
+        app: youtube-backend
+    spec:
+      containers:
+      - name: youtube-backend
+        image: janisadhi/backend-youtube:v0.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        livenessProbe:
+          httpGet: 
+            port: 5000
+            path: /
+          initialDelaySeconds: 10  
+          periodSeconds: 5  
+          failureThreshold: 3  
+          timeoutSeconds: 2  

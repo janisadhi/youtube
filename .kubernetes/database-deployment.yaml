@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: youtube
+  labels:
+    app: youtube-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: youtube-database
+  template:
+    metadata:
+      labels:
+        app: youtube-database
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "janis123"
+        - name: POSTGRES_DB
+          value: "youtubeclone"
+        ports:
+        - containerPort: 5432
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc

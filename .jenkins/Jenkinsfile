@@ -1,0 +1,74 @@
+pipeline {
+    agent any
+
+    environment {
+        BACKEND_IMAGE = 'janisadhi/backend-youtube:v0.1'
+        FRONTEND_IMAGE = 'janisadhi/frontend-youtube:v0.1'
+        ANSIBLE_HOST_KEY_CHECKING = 'False'
+
+    }
+
+    stages {
+        stage('Source Code Fetch') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_PASS')]) {
+                    sh "git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/janisadhi/youtube-clone.git"
+                }
+            }
+        }
+
+        stage('Docker Hub Login') {
+            steps {
+                script {
+                    echo 'Logging into Docker Hub...'
+                    withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKERHUB_USR', passwordVariable: 'DOCKERHUB_PASS')]) {
+                        sh """
+                        echo ${DOCKERHUB_PASS} | docker login -u ${DOCKERHUB_USR} --password-stdin
+                        """
+                    }
+                }
+            }
+        }
+        
+        stage('Build and Push Backend Image') {
+            steps {
+                sh "docker build -t ${BACKEND_IMAGE} -f .docker/Backend/Dockerfile ."
+                sh "docker push ${BACKEND_IMAGE}"
+            }
+        }
+        
+        stage('Build and Push Frontend Image') {
+            steps {
+                sh "docker build -t ${FRONTEND_IMAGE} -f .docker/Frontend/Dockerfile ."
+                sh "docker push ${FRONTEND_IMAGE}"
+            }
+        }
+ 
+
+       stage('Ansible playbook') {
+            steps {
+                withCredentials([
+                    file(credentialsId: 'sibersegment.pem', variable: 'PRIVATE_KEY')
+                ]) {
+                    script {
+                        sh '''
+                       
+                        echo "Setting correct permissions for private key..."
+                        chmod 600 "$PRIVATE_KEY"
+
+                        echo "Running Ansible Playbook..."
+                        ansible-playbook -i .ansible/inventory.ini --private-key "$PRIVATE_KEY" .ansible/playbook.yaml
+                        '''
+                    }
+                }
+            }
+        }
+
+    }
+    post {
+        always {
+            echo 'Cleaning up workspace...'
+            cleanWs()
+        }
+    }
+}

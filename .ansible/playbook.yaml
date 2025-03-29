@@ -1,0 +1,10 @@
+- name: deploy youtube clone
+  hosts: youtube
+  become: true
+  roles:
+    - role: docker-install
+      tags: docker-install
+
+    - role: deploy
+      tags: deploy
+    

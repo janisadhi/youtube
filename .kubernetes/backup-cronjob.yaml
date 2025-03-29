@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: daily-backup
+  namespace: youtube 
+spec:
+  schedule: "0 22 * * *"  
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup-container
+            image: janisadhi/youtube-backup:v0.1 
+            imagePullPolicy: Always 
+            env:
+              - name: DB_USER
+                value: "postgres"
+              - name: DB_PASSWORD
+                value: "janis123"
+              - name: DB_HOST
+                value: "postgres"
+              - name: DB_PORT
+                value: "5432"  
+              - name: DB_NAME
+                value: "youtubeclone" 
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "500m"
+              limits:
+                memory: "512Mi"
+                cpu: "1"
+            volumeMounts:
+            - name: backup-volume
+              mountPath: /backups  
+
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup-volume
+            persistentVolumeClaim:
+              claimName: postgres-backup-pvc  

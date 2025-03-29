@@ -1,0 +1,45 @@
+version: '3.8'
+
+networks:
+  youtube:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+
+services:
+  frontend:
+    image: janisadhi/frontend-youtube:v0.1
+    container_name: frontend
+    ports:
+      - "7000:80"
+    networks:
+      - youtube
+   
+  backend:
+    image: janisadhi/backend-youtube:v0.1
+    container_name: backend
+    ports:
+      - "5000:5000"
+    networks:
+      - youtube
+    depends_on: 
+      database:
+        condition: service_healthy
+
+
+  database:
+    image: postgres:16
+    container_name: postgres
+    networks:
+      - youtube
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 10s

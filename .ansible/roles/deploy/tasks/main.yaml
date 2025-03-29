@@ -1,0 +1,29 @@
+---
+- name: create working dir
+  file:
+    path: /home/ubuntu/youtube
+    state: directory
+    mode: '0755'
+
+- name: copy docker-compose file
+  copy:
+    src: ../.docker/docker-compose.yaml
+    dest: /home/ubuntu/youtube/docker-compose.yaml
+
+- name: copy .env file
+  copy:
+    src: ../.docker/.env
+    dest: /home/ubuntu/youtube/.env
+
+- name: Bring down existing containers
+  community.docker.docker_compose_v2:
+    project_src: /home/ubuntu/youtube
+    state: absent
+
+- name: Start containers with latest images
+  community.docker.docker_compose_v2:
+    project_src: /home/ubuntu/youtube
+    state: present
+    pull: always
+
+

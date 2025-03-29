@@ -1,0 +1,106 @@
+name: CI/CD Pipeline for youtube clone
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    env:
+      BACKEND_IMAGE: janisadhi/backend-youtube:v0.1
+      FRONTEND_IMAGE: janisadhi/frontend-youtube:v0.1
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USR }}
+          password: ${{ secrets.DOCKERHUB_PASS }}
+
+      - name: Build and push backend image
+        run: |
+          docker build -t $BACKEND_IMAGE -f .docker/Backend/Dockerfile .
+          docker push $BACKEND_IMAGE
+
+      - name: Build and push frontend image
+        run: |
+          docker build -t $FRONTEND_IMAGE -f .docker/Frontend/Dockerfile .
+          docker push $FRONTEND_IMAGE
+
+  #for docker-compose deployment
+  # deployment:
+  #   name: Deployment
+  #   runs-on: ubuntu-latest
+  #   needs: build
+
+  #   env:
+  #     ANSIBLE_HOST_KEY_CHECKING: 'False'
+
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Set up Ansible
+  #       run: |
+  #         sudo apt update && sudo apt install -y ansible
+
+  #     - name: Deploy with Ansible
+  #       env:
+  #         PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  #       run: |
+  #         echo "$PRIVATE_KEY" > private_key.pem
+  #         chmod 600 private_key.pem
+  #         ansible-playbook -i .ansible/inventory.ini --private-key private_key.pem .ansible/playbook.yaml
+
+  #     - name: Cleanup
+  #       run: |
+  #         rm -f private_key.pem
+
+
+  #for kubernetes deployment
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Kubernetes
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.29.13'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+
+      - name: Set up kubectl context
+        run: |
+          kubectl config use-context ${{ secrets.KUBE_CONTEXT }}
+        
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy application to Kubernetes
+        run: |
+          kubectl config set-context --current --namespace=youtube
+          kubectl rollout status deployment/youtube
+          kubectl rollout status deployment/youtube-backend
+          
+
+      - name: Verify the deployment
+        run: |
+          kubectl get pods
