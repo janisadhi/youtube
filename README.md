@@ -1,5 +1,19 @@
 # Youtube Clone Deployment full documentation
 ![diagram-export-3-28-2025-11_30_23-PM.png](Deployment-Architecture.png)
+
+# Table of Contents  
+
+1. [Source Code Management](https://github.com/janisadhi/youtube?tab=readme-ov-file#stage-1-source-code-management)  
+2. [Research and Testing Application Locally](https://github.com/janisadhi/youtube?tab=readme-ov-file#stage-2-research-and-testing-application-locally)  
+3. [Containerization](https://github.com/janisadhi/youtube?tab=readme-ov-file#stage-3-containerization)  
+4. [Docker-Compose Deployment Using Ansible in AWS EC2](https://github.com/janisadhi/youtube?tab=readme-ov-file#stage-4-docker-compose-deployment-using-ansible-in-aws-ec2)  
+5. [Continuous Integration and Continuous Deployment Using Docker-Compose and Ansible](https://github.com/janisadhi/youtube?tab=readme-ov-file#stage-5-continuous-integration-and-continuous-deployment-using-docker-compose-and-ansible)  
+6. [Kubernetes Manifest Writing and Cluster Creation](https://github.com/janisadhi/youtube?tab=readme-ov-file#stage-6-kubernetes-manifest-writing-and-cluster-creation)  
+7. [Backup](https://github.com/janisadhi/youtube?tab=readme-ov-file#stage-7-backup)  
+8. [Monitoring](https://github.com/janisadhi/youtube?tab=readme-ov-file#stage-8-monitoring)  
+9. [EKS Setup](https://github.com/janisadhi/youtube?tab=readme-ov-file#stage-9-eks-setup)  
+10. [CI/CD with EKS](https://github.com/janisadhi/youtube?tab=readme-ov-file#stage-10-cicd-with-eks)
+
 ## Stage 1: Source Code Management
 
 1. I found the YouTube clone application from the following GitHub repositories:
